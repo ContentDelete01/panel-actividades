@@ -909,7 +909,13 @@ async function signUp(){
   if(!email || !password){ showMsg('Completa correo y contraseña.',true); return; }
   if(password.length<6){ showMsg('La contraseña debe tener al menos 6 caracteres.',true); return; }
   showMsg('Creando cuenta...');
-  const {data,error}=await supabaseClient.auth.signUp({email,password});
+  const {data,error}=await supabaseClient.auth.signUp({
+     email,
+    password,
+    options: {
+        emailRedirectTo: 'https://contentdelete01.github.io/panel-actividades/'
+    }
+  });
   if(error){ showMsg(error.message,true); return; }
   if(data.session){
     await onSignedIn(data.user);
