@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de Actividades — Ciclo 3</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  :root{
+    --navy:#0F1D29;
+    --panel:#16293A;
+    --panel-2:#1C3247;
+    --row-hover:#20394F;
+    --hairline:#2C4A63;
+    --cream:#F3ECDB;
+    --muted:#8FAAC0;
+    --amber:#E8A73D;
+    --amber-dim:#B98333;
+    --red:#E2635B;
+    --green:#63AE86;
+    --shadow: 0 12px 28px rgba(0,0,0,0.35);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 10% -10%, #14263650, transparent),
+      var(--navy);
+    color:var(--cream);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    padding:28px 18px 60px;
+  }
+  .wrap{max-width:1080px;margin:0 auto;}
+
+  /* ===== Header / signature split-flap title ===== */
+  header{margin-bottom:26px;}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    letter-spacing:.14em;
+    color:var(--amber);
+    text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  .board-title{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .flap{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:clamp(20px, 4vw, 34px);
+    background:linear-gradient(180deg, var(--panel-2) 0%, var(--panel) 100%);
+    border:1px solid var(--hairline);
+    border-radius:6px;
+    padding:6px 10px;
+    position:relative;
+    box-shadow: inset 0 -12px 14px -12px rgba(0,0,0,0.5);
+  }
+  .flap::after{
+    content:"";
+    position:absolute; left:0; right:0; top:50%;
+    height:1px; background:rgba(0,0,0,0.4);
+  }
+  .flap.space{background:transparent;border:none;box-shadow:none;width:10px;}
+  .subtitle{
+    margin-top:12px;
+    color:var(--muted);
+    font-size:14px;
+  }
+  .subtitle b{color:var(--cream);font-weight:600;}
+
+  /* ===== Stat strip ===== */
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:10px;
+    margin:22px 0 24px;
+  }
+  .stat{
+    background:var(--panel);
+    border:1px solid var(--hairline);
+    border-radius:10px;
+    padding:14px 16px;
+  }
+  .stat .n{
+    font-family:'JetBrains Mono',monospace;
+    font-size:26px;
+    font-weight:700;
+  }
+  .stat .l{
+    font-size:11px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-top:2px;
+  }
+  .stat.overdue .n{color:var(--red);}
+  .stat.week .n{color:var(--amber);}
+  .stat.done .n{color:var(--green);}
+
+  /* ===== Toolbar ===== */
+  .toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    align-items:center;
+    margin-bottom:16px;
+  }
+  select, input[type=text], input[type=date], input[type=time], textarea{
+    background:var(--panel-2);
+    border:1px solid var(--hairline);
+    color:var(--cream);
+    border-radius:7px;
+    padding:9px 11px;
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    outline:none;
+  }
+  select:focus, input:focus, textarea:focus{border-color:var(--amber);}
+  .search{flex:1 1 160px;min-width:140px;}
+  .btn{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:13px;
+    border-radius:7px;
+    padding:10px 16px;
+    border:1px solid transparent;
+    cursor:pointer;
+    transition:transform .05s ease;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--amber);color:#241703;}
+  .btn-primary:hover{background:#f0b357;}
+  .btn-ghost{background:transparent;color:var(--cream);border-color:var(--hairline);}
+  .btn-ghost:hover{border-color:var(--amber);color:var(--amber);}
+  .spacer{flex:1 1 auto;}
+
+  /* ===== Board (activity list) ===== */
+  .board{
+    background:var(--panel);
+    border:1px solid var(--hairline);
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+  }
+  .board-head{
+    display:grid;
+    grid-template-columns: 18px 1.6fr 1fr 96px 84px 110px 74px;
+    gap:10px;
+    padding:10px 16px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    border-bottom:1px solid var(--hairline);
+  }
+  .row{
+    display:grid;
+    grid-template-columns: 18px 1.6fr 1fr 96px 84px 110px 74px;
+    gap:10px;
+    align-items:center;
+    padding:13px 16px;
+    border-bottom:1px solid var(--hairline);
+    font-size:13px;
+  }
+  .row:last-child{border-bottom:none;}
+  .row:hover{background:var(--row-hover);}
+  .row.done{opacity:.5;}
+  .row.done .title{text-decoration:line-through;}
+  .dot{width:9px;height:9px;border-radius:50%;}
+  .title{font-weight:600;}
+  .course-name{color:var(--muted);font-size:12px;}
+  .tag{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    letter-spacing:.04em;
+    color:var(--muted);
+    text-transform:uppercase;
+  }
+  .datecell{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--cream);}
+  .days{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:13px;
+    border-radius:5px;
+    padding:3px 7px;
+    text-align:center;
+    width:fit-content;
+  }
+  .days.overdue{background:rgba(226,99,91,.18);color:var(--red);}
+  .days.today{background:rgba(232,167,61,.22);color:var(--amber);}
+  .days.soon{background:rgba(232,167,61,.14);color:var(--amber-dim);}
+  .days.later{background:rgba(143,170,192,.12);color:var(--muted);}
+  .days.done{background:rgba(99,174,134,.16);color:var(--green);}
+  .badge{
+    font-size:11px;
+    font-weight:600;
+    padding:4px 8px;
+    border-radius:20px;
+    width:fit-content;
+  }
+  .badge.pendiente{background:rgba(143,170,192,.15);color:var(--muted);}
+  .badge.progreso{background:rgba(232,167,61,.18);color:var(--amber);}
+  .badge.completado{background:rgba(99,174,134,.18);color:var(--green);}
+  .actions{display:flex;gap:6px;justify-content:flex-end;}
+  .icon-btn{
+    background:none;border:1px solid var(--hairline);color:var(--muted);
+    border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:13px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .icon-btn:hover{border-color:var(--amber);color:var(--amber);}
+  .icon-btn.check:hover{border-color:var(--green);color:var(--green);}
+  .icon-btn.del:hover{border-color:var(--red);color:var(--red);}
+
+  .empty{
+    padding:44px 20px;
+    text-align:center;
+    color:var(--muted);
+    font-size:13px;
+  }
+  .empty b{display:block;color:var(--cream);font-family:'Space Grotesk',sans-serif;font-size:16px;margin-bottom:6px;}
+
+  /* ===== Courses reference ===== */
+  .courses{margin-top:32px;}
+  .courses h2{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:15px;
+    color:var(--cream);
+    letter-spacing:.02em;
+    margin-bottom:12px;
+  }
+  .course-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:10px;
+  }
+  .course-card{
+    background:var(--panel);
+    border:1px solid var(--hairline);
+    border-left:4px solid var(--amber);
+    border-radius:8px;
+    padding:12px 14px;
+  }
+  .course-card .cname{font-weight:600;font-size:13px;margin-bottom:6px;}
+  .course-card .cmeta{font-size:11px;color:var(--muted);line-height:1.6;}
+
+  /* ===== Modal ===== */
+  .overlay{
+    position:fixed;inset:0;background:rgba(6,12,18,.72);
+    display:none;align-items:center;justify-content:center;
+    padding:20px;z-index:50;
+  }
+  .overlay.open{display:flex;}
+  .modal{
+    background:var(--panel);
+    border:1px solid var(--hairline);
+    border-radius:12px;
+    width:100%;max-width:440px;
+    padding:22px;
+    box-shadow:var(--shadow);
+  }
+  .modal h3{
+    font-family:'Space Grotesk',sans-serif;
+    margin:0 0 16px;
+    font-size:17px;
+  }
+  .field{margin-bottom:12px;display:flex;flex-direction:column;gap:5px;}
+  .field label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+  .field select, .field input, .field textarea{width:100%;}
+  .field-row{display:flex;gap:10px;}
+  .field-row .field{flex:1;}
+  textarea{resize:vertical;min-height:56px;font-family:'Inter',sans-serif;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:6px;}
+  .status-msg{font-size:12px;color:var(--muted);margin-top:10px;min-height:16px;}
+  .status-msg.error{color:var(--red);}
+
+  @media (max-width:680px){
+    .board-head{display:none;}
+    .row{
+      grid-template-columns:1fr;
+      gap:6px;
+      position:relative;
+      padding-right:74px;
+    }
+    .row .actions{position:absolute;top:13px;right:10px;}
+    .row .dot{position:absolute;top:16px;left:16px;}
+    .row{padding-left:32px;}
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .auth-overlay{position:fixed;inset:0;background:rgba(6,12,18,.94);display:flex;align-items:center;justify-content:center;padding:20px;z-index:100}
+  .auth-card{background:#16293A;border:1px solid #2C4A63;border-radius:14px;width:100%;max-width:460px;padding:26px;box-shadow:0 18px 45px rgba(0,0,0,.5)}
+  .auth-card h2{font-family:'Space Grotesk',sans-serif;margin:0 0 8px;color:#F3ECDB}
+  .auth-card p{font-size:12px;line-height:1.55;color:#8FAAC0;margin:0 0 18px}
+  .auth-card label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:#8FAAC0;margin:12px 0 5px}
+  .auth-card input{width:100%;background:#1C3247;border:1px solid #2C4A63;color:#F3ECDB;border-radius:7px;padding:10px 11px;outline:none}
+  .auth-card input:focus{border-color:#E8A73D}
+  .auth-actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+  .auth-msg{font-size:12px;color:#8FAAC0;min-height:18px;margin-top:10px}
+  .auth-msg.error{color:#E2635B}.auth-msg.ok{color:#63AE86}
+  #userBar{position:fixed;top:12px;right:14px;z-index:20;display:none;align-items:center;gap:8px;background:#16293A;border:1px solid #2C4A63;border-radius:8px;padding:7px 9px;font-size:11px;color:#8FAAC0}
+  #userBar button{background:transparent;color:#F3ECDB;border:1px solid #2C4A63;border-radius:6px;padding:5px 8px;cursor:pointer}
+  #userBar button:hover{border-color:#E8A73D;color:#E8A73D}
+  #syncStatus{position:fixed;left:14px;bottom:14px;z-index:20;background:#16293A;border:1px solid #2C4A63;border-radius:8px;padding:7px 10px;font-size:11px;color:#63AE86}
+  .import-box{margin-top:16px;padding:12px;border:1px solid #2C4A63;background:#1C3247;border-radius:8px;display:none}
+</style>
+</head>
+<body>
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-card" id="authCard">
+    <h2 id="authTitle">Conectar Panel</h2>
+    <p id="authSubtitle">Conecta este panel a tu base de datos para sincronizarlo entre tus dispositivos.</p>
+    <div id="configFields">
+      <label>Project URL</label>
+      <input id="cfgUrl" type="text" value="https://rszugetpvwcoxcjcnoew.supabase.co" autocomplete="off">
+      <label>Publishable key</label>
+      <input id="cfgKey" type="password" placeholder="sb_publishable_..." autocomplete="off">
+    </div>
+    <div id="loginFields" style="display:none">
+      <label>Correo</label>
+      <input id="authEmail" type="email" placeholder="tu-correo@ejemplo.com" autocomplete="email">
+      <label>Contraseña</label>
+      <input id="authPassword" type="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <div class="auth-actions">
+      <button class="btn btn-primary" id="authPrimary">Conectar</button>
+      <button class="btn btn-ghost" id="authSecondary" style="display:none">Crear cuenta</button>
+    </div>
+    <div class="auth-msg" id="authMsg"></div>
+    <div class="import-box" id="importBox">
+      <b style="color:#F3ECDB">Actividades locales encontradas</b>
+      <div style="font-size:11px;color:#8FAAC0;margin-top:5px">Puedes copiarlas a tu cuenta en la nube.</div>
+      <button class="btn btn-ghost" id="btnImportLocal" style="margin-top:9px">Importar actividades</button>
+    </div>
+  </div>
+</div>
+<div id="userBar"><span id="userEmail"></span><button id="btnImportTop">Importar local</button><button id="btnLogout">Cerrar sesión</button></div>
+<div id="syncStatus">☁ Conectando...</div>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Universidad · Ciclo actual</div>
+    <div class="board-title" id="boardTitle"></div>
+    <div class="subtitle">6 cursos activos · <b>17 ago – 06 dic 2026</b> · seguimiento de tareas, exámenes y entregas</div>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="n" id="statPending">0</div><div class="l">Pendientes</div></div>
+    <div class="stat overdue"><div class="n" id="statOverdue">0</div><div class="l">Vencidas</div></div>
+    <div class="stat week"><div class="n" id="statWeek">0</div><div class="l">Esta semana</div></div>
+    <div class="stat done"><div class="n" id="statDone">0</div><div class="l">Completadas</div></div>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" class="search" id="searchInput" placeholder="Buscar actividad...">
+    <select id="filterCourse"><option value="">Todos los cursos</option></select>
+    <select id="filterType">
+      <option value="">Todos los tipos</option>
+      <option>Tarea</option>
+      <option>Examen parcial</option>
+      <option>Examen final</option>
+      <option>Exposición</option>
+      <option>Trabajo/Proyecto</option>
+      <option>Lectura</option>
+      <option>Otro</option>
+    </select>
+    <select id="filterStatus">
+      <option value="">Todos los estados</option>
+      <option value="Pendiente">Pendiente</option>
+      <option value="En progreso">En progreso</option>
+      <option value="Completado">Completado</option>
+    </select>
+    <select id="sortOrder">
+      <option value="asc">Fecha: más próxima primero</option>
+      <option value="desc">Fecha: más lejana primero</option>
+    </select>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" id="btnAdd">+ Nueva actividad</button>
+  </div>
+
+  <div class="board">
+    <div class="board-head">
+      <div></div>
+      <div>Actividad</div>
+      <div>Curso</div>
+      <div>Fecha</div>
+      <div>Faltan</div>
+      <div>Estado</div>
+      <div></div>
+    </div>
+    <div id="rows"></div>
+    <div class="empty" id="emptyState" style="display:none;">
+      <b>Sin actividades por aquí</b>
+      Agrega tu primera tarea, lectura o examen con "+ Nueva actividad".
+    </div>
+  </div>
+
+  <div class="courses">
+    <h2>Cursos del ciclo</h2>
+    <div class="course-grid" id="courseGrid"></div>
+  </div>
+
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3 id="modalTitle">Nueva actividad</h3>
+    <div style="font-size:11px;color:#8FAAC0;margin:-8px 0 14px;">
+      Completa los detalles de la actividad y guárdala.
+    </div>
+    <form id="activityForm">
+      <div class="field">
+        <label>Curso</label>
+        <select id="fCourse" required></select>
+      </div>
+      <div class="field">
+        <label>Título</label>
+        <input type="text" id="fTitle" placeholder="Ej. Práctica calificada 2" required>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Tipo</label>
+          <select id="fType">
+            <option>Tarea</option>
+            <option>Examen parcial</option>
+            <option>Examen final</option>
+            <option>Exposición</option>
+            <option>Trabajo/Proyecto</option>
+            <option>Lectura</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Estado</label>
+          <select id="fStatus">
+            <option value="Pendiente">Pendiente</option>
+            <option value="En progreso">En progreso</option>
+            <option value="Completado">Completado</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Fecha límite</label>
+          <input type="date" id="fDate" required>
+        </div>
+        <div class="field">
+          <label>Hora (opcional)</label>
+          <input type="time" id="fTime">
+        </div>
+      </div>
+      <div class="field">
+        <label>Notas</label>
+        <textarea id="fNotes" placeholder="Detalles, enlaces, criterios..."></textarea>
+      </div>
+      <div class="status-msg" id="formMsg"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="btnCancel">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="storageStatus" style="
+  position:fixed;right:14px;bottom:14px;z-index:30;
+  background:#16293A;border:1px solid #2C4A63;color:#8FAAC0;
+  border-radius:8px;padding:8px 11px;font:11px Inter,Arial,sans-serif;
+">
+  ✓ Guardado en este dispositivo
+</div>
+
+<script>
+const TITLE = "PANEL DE ACTIVIDADES";
+const boardTitle = document.getElementById('boardTitle');
+TITLE.split('').forEach(ch=>{
+  const d = document.createElement('div');
+  d.className = ch === ' ' ? 'flap space' : 'flap';
+  d.textContent = ch === ' ' ? '' : ch;
+  boardTitle.appendChild(d);
+});
+
+const DEFAULT_COURSES = [
+  { id:'c1', name:'Teoría de Juegos y Conducta Económica', sede:'Comas', modalidad:'Presencial', creditos:4, inicio:'2026-08-17', fin:'2026-12-06', color:'#E8A73D' },
+  { id:'c2', name:'Fundamentos de Microeconomía', sede:'Los Olivos', modalidad:'Presencial', creditos:4, inicio:'2026-08-17', fin:'2026-12-06', color:'#63AE86' },
+  { id:'c3', name:'Fund. Sostenibilidad Ambiental', sede:'Virtual', modalidad:'Virtual', creditos:2, inicio:'2026-08-17', fin:'2026-10-11', color:'#8FAAC0' },
+  { id:'c4', name:'Métodos Cuantitativos 1', sede:'Comas', modalidad:'Presencial', creditos:5, inicio:'2026-08-17', fin:'2026-12-06', color:'#E2635B' },
+  { id:'c5', name:'Valor Dinero y Operac. Financieras', sede:'Los Olivos', modalidad:'Presencial', creditos:4, inicio:'2026-08-17', fin:'2026-12-06', color:'#C48FE8' },
+  { id:'c6', name:'Probabilidad y Estadística', sede:'Virtual', modalidad:'Virtual', creditos:2, inicio:'2026-08-17', fin:'2026-10-11', color:'#5FBFDB' },
+];
+
+let courses = [];
+let activities = [];
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+function fmtDate(iso){
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y.slice(2)}`;
+}
+
+function daysDiff(iso){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const target = new Date(iso + 'T00:00:00');
+  return Math.round((target - today) / 86400000);
+}
+
+function courseById(id){ return courses.find(c=>c.id===id); }
+
+const STORAGE_KEY_COURSES = 'panel_actividades_courses_v2';
+const STORAGE_KEY_ACTIVITIES = 'panel_actividades_activities_v2';
+const STORAGE_KEY_SUPABASE_URL = 'panel_supabase_url';
+const STORAGE_KEY_SUPABASE_KEY = 'panel_supabase_key';
+
+let supabaseClient = null;
+let currentUser = null;
+let realtimeChannel = null;
+let authReady = false;
+
+function setSyncStatus(text, good=true){
+  const el = document.getElementById('syncStatus');
+  if(!el) return;
+  el.textContent = text;
+  el.style.color = good ? '#63AE86' : '#E2635B';
+}
+
+function loadCourses(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY_COURSES);
+    courses = raw ? JSON.parse(raw) : DEFAULT_COURSES.map(c=>({...c}));
+    if(!Array.isArray(courses) || courses.length !== DEFAULT_COURSES.length){
+      courses = DEFAULT_COURSES.map(c=>({...c}));
+    }
+  }catch(e){ courses = DEFAULT_COURSES.map(c=>({...c})); }
+  localStorage.setItem(STORAGE_KEY_COURSES, JSON.stringify(courses));
+}
+
+function loadLocalActivities(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY_ACTIVITIES);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  }catch(e){ return []; }
+}
+
+function saveLocalBackup(){
+  try{ localStorage.setItem(STORAGE_KEY_ACTIVITIES, JSON.stringify(activities)); }catch(e){}
+}
+
+function normalizeRow(r){
+  return {
+    id: r.id,
+    courseId: r.course_id,
+    title: r.title,
+    type: r.type,
+    status: r.status,
+    dueDate: r.due_date,
+    dueTime: r.due_time ? String(r.due_time).slice(0,5) : '',
+    notes: r.notes || ''
+  };
+}
+
+async function loadRemoteActivities(){
+  const {data, error} = await supabaseClient
+    .from('activities')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('due_date', {ascending:true});
+  if(error) throw error;
+  activities = (data || []).map(normalizeRow);
+  saveLocalBackup();
+  render();
+}
+
+async function upsertRemote(activity){
+  const row = {
+    id: activity.id,
+    user_id: currentUser.id,
+    course_id: activity.courseId,
+    title: activity.title,
+    type: activity.type,
+    status: activity.status,
+    due_date: activity.dueDate,
+    due_time: activity.dueTime || null,
+    notes: activity.notes || '',
+    updated_at: new Date().toISOString()
+  };
+  const {error} = await supabaseClient.from('activities').upsert(row);
+  if(error) throw error;
+}
+
+async function deleteRemote(id){
+  const {error} = await supabaseClient.from('activities').delete().eq('id', id).eq('user_id', currentUser.id);
+  if(error) throw error;
+}
+
+async function initLocalUI(){
+  loadCourses();
+  populateCourseSelects();
+  renderCourseGrid();
+  activities = loadLocalActivities();
+  render();
+}
+
+function populateCourseSelects(){
+  const filterCourse = document.getElementById('filterCourse');
+  const fCourse = document.getElementById('fCourse');
+  filterCourse.innerHTML = '<option value="">Todos los cursos</option>' +
+    courses.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  fCourse.innerHTML = courses.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+}
+
+function renderCourseGrid(){
+  const grid = document.getElementById('courseGrid');
+  grid.innerHTML = courses.map(c=>`
+    <div class="course-card" style="border-left-color:${c.color}">
+      <div class="cname">${c.name}</div>
+      <div class="cmeta">
+        ${c.sede} · ${c.modalidad} · ${c.creditos} créditos<br>
+        ${fmtDate(c.inicio)} – ${fmtDate(c.fin)}
+      </div>
+    </div>
+  `).join('');
+}
+
+function statusOf(a){
+  if(a.status === 'Completado') return {label:'done', cls:'done'};
+  const d = daysDiff(a.dueDate);
+  if(d < 0) return {label:'Vencido', cls:'overdue', d};
+  if(d === 0) return {label:'Hoy', cls:'today', d};
+  if(d <= 3) return {label:`${d} d`, cls:'today', d};
+  if(d <= 7) return {label:`${d} d`, cls:'soon', d};
+  return {label:`${d} d`, cls:'later', d};
+}
+
+function render(){
+  const search = document.getElementById('searchInput').value.trim().toLowerCase();
+  const fCourse = document.getElementById('filterCourse').value;
+  const fType = document.getElementById('filterType').value;
+  const fStatus = document.getElementById('filterStatus').value;
+  const order = document.getElementById('sortOrder').value;
+
+  let list = activities.filter(a=>{
+    if(search && !a.title.toLowerCase().includes(search)) return false;
+    if(fCourse && a.courseId !== fCourse) return false;
+    if(fType && a.type !== fType) return false;
+    if(fStatus && a.status !== fStatus) return false;
+    return true;
+  });
+
+  list.sort((a,b)=>{
+    const cmp = a.dueDate.localeCompare(b.dueDate);
+    return order === 'asc' ? cmp : -cmp;
+  });
+
+  const rowsEl = document.getElementById('rows');
+  const emptyEl = document.getElementById('emptyState');
+
+  if(list.length === 0){
+    rowsEl.innerHTML = '';
+    emptyEl.style.display = 'block';
+  } else {
+    emptyEl.style.display = 'none';
+    rowsEl.innerHTML = list.map(a=>{
+      const course = courseById(a.courseId);
+      const st = statusOf(a);
+      const done = a.status === 'Completado';
+      const daysCls = done ? 'done' : st.cls;
+      const daysLabel = done ? '✓' : st.label;
+      const badgeCls = a.status === 'Completado' ? 'completado' : (a.status === 'En progreso' ? 'progreso' : 'pendiente');
+      return `
+        <div class="row ${done?'done':''}" data-id="${a.id}">
+          <div class="dot" style="background:${course ? course.color : '#8FAAC0'}"></div>
+          <div>
+            <div class="title">${a.title}</div>
+            ${a.notes ? `<div class="tag">${a.type}</div>` : `<div class="tag">${a.type}</div>`}
+          </div>
+          <div class="course-name">${course ? course.name : '—'}</div>
+          <div class="datecell">${fmtDate(a.dueDate)}${a.dueTime ? ' · ' + a.dueTime : ''}</div>
+          <div class="days ${daysCls}">${daysLabel}</div>
+          <div class="badge ${badgeCls}">${a.status}</div>
+          <div class="actions">
+            <button class="icon-btn check" title="Marcar completada" data-action="toggle">✓</button>
+            <button class="icon-btn" title="Editar" data-action="edit">✎</button>
+            <button class="icon-btn del" title="Eliminar" data-action="delete">✕</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  updateStats();
+}
+
+function updateStats(){
+  const pending = activities.filter(a=>a.status !== 'Completado');
+  const overdue = pending.filter(a=>daysDiff(a.dueDate) < 0);
+  const week = pending.filter(a=>{ const d = daysDiff(a.dueDate); return d >= 0 && d <= 7; });
+  const done = activities.filter(a=>a.status === 'Completado');
+  document.getElementById('statPending').textContent = pending.length;
+  document.getElementById('statOverdue').textContent = overdue.length;
+  document.getElementById('statWeek').textContent = week.length;
+  document.getElementById('statDone').textContent = done.length;
+}
+
+/* ===== Modal handling ===== */
+const overlay = document.getElementById('overlay');
+const form = document.getElementById('activityForm');
+const formMsg = document.getElementById('formMsg');
+let editingId = null;
+
+function openModal(activity){
+  editingId = activity ? activity.id : null;
+  document.getElementById('modalTitle').textContent = activity ? 'Editar actividad' : 'Nueva actividad';
+  document.getElementById('fCourse').value = activity ? activity.courseId : courses[0].id;
+  document.getElementById('fTitle').value = activity ? activity.title : '';
+  document.getElementById('fType').value = activity ? activity.type : 'Tarea';
+  document.getElementById('fStatus').value = activity ? activity.status : 'Pendiente';
+  document.getElementById('fDate').value = activity ? activity.dueDate : '';
+  document.getElementById('fTime').value = activity ? (activity.dueTime || '') : '';
+  document.getElementById('fNotes').value = activity ? (activity.notes || '') : '';
+  formMsg.textContent = '';
+  formMsg.classList.remove('error');
+  overlay.classList.add('open');
+}
+
+function closeModal(){
+  overlay.classList.remove('open');
+  form.reset();
+  editingId = null;
+}
+
+document.getElementById('btnAdd').addEventListener('click', ()=>openModal(null));
+document.getElementById('btnCancel').addEventListener('click', closeModal);
+overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeModal(); });
+
+form.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const data = {
+    courseId: document.getElementById('fCourse').value,
+    title: document.getElementById('fTitle').value.trim(),
+    type: document.getElementById('fType').value,
+    status: document.getElementById('fStatus').value,
+    dueDate: document.getElementById('fDate').value,
+    dueTime: document.getElementById('fTime').value,
+    notes: document.getElementById('fNotes').value.trim(),
+  };
+  if(!data.title || !data.dueDate){
+    formMsg.textContent = 'Completa el título y la fecha límite.';
+    formMsg.classList.add('error');
+    return;
+  }
+  const previous = editingId ? activities.find(a=>a.id === editingId) : null;
+  const activity = editingId
+    ? { ...previous, ...data }
+    : { id: uid(), ...data };
+
+  formMsg.textContent = 'Guardando...';
+  formMsg.classList.remove('error');
+  try{
+    await upsertRemote(activity);
+    if(editingId){
+      const idx = activities.findIndex(a=>a.id === editingId);
+      if(idx > -1) activities[idx] = activity;
+    }else{
+      activities.push(activity);
+    }
+    saveLocalBackup();
+    closeModal();
+    render();
+    setSyncStatus('☁ Sincronizado');
+  }catch(err){
+    console.error(err);
+    formMsg.textContent = 'No se pudo guardar: ' + (err.message || err);
+    formMsg.classList.add('error');
+    return;
+  }
+});
+
+/* ===== Row actions (edit / delete / toggle complete) ===== */
+document.getElementById('rows').addEventListener('click', async (e)=>{
+  const btn = e.target.closest('button[data-action]');
+  if(!btn) return;
+  const row = btn.closest('.row');
+  const id = row.dataset.id;
+  const activity = activities.find(a=>a.id === id);
+  if(!activity) return;
+
+  if(btn.dataset.action === 'edit'){
+    openModal(activity);
+  } else if(btn.dataset.action === 'delete'){
+    if(!confirm('¿Eliminar esta actividad?')) return;
+    try{
+      await deleteRemote(id);
+      activities = activities.filter(a=>a.id !== id);
+      saveLocalBackup();
+      render();
+      setSyncStatus('☁ Sincronizado');
+    }catch(err){
+      alert('No se pudo eliminar: ' + (err.message || err));
+    }
+  } else if(btn.dataset.action === 'toggle'){
+    const next = { ...activity, status: activity.status === 'Completado' ? 'Pendiente' : 'Completado' };
+    try{
+      await upsertRemote(next);
+      Object.assign(activity, next);
+      saveLocalBackup();
+      render();
+      setSyncStatus('☁ Sincronizado');
+    }catch(err){
+      alert('No se pudo actualizar: ' + (err.message || err));
+    }
+  }
+});
+
+/* ===== Filters ===== */
+['searchInput','filterCourse','filterType','filterStatus','sortOrder'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', render);
+  document.getElementById(id).addEventListener('change', render);
+});
+
+
+/* ===== Supabase authentication + realtime ===== */
+const authOverlay = document.getElementById('authOverlay');
+const authMsg = document.getElementById('authMsg');
+const authTitle = document.getElementById('authTitle');
+const authSubtitle = document.getElementById('authSubtitle');
+const configFields = document.getElementById('configFields');
+const loginFields = document.getElementById('loginFields');
+const authPrimary = document.getElementById('authPrimary');
+const authSecondary = document.getElementById('authSecondary');
+const cfgUrl = document.getElementById('cfgUrl');
+const cfgKey = document.getElementById('cfgKey');
+const authEmail = document.getElementById('authEmail');
+const authPassword = document.getElementById('authPassword');
+const userBar = document.getElementById('userBar');
+const userEmail = document.getElementById('userEmail');
+const btnLogout = document.getElementById('btnLogout');
+const btnImportTop = document.getElementById('btnImportTop');
+const importBox = document.getElementById('importBox');
+const btnImportLocal = document.getElementById('btnImportLocal');
+
+let authMode = 'config';
+
+function showMsg(text, error=false){
+  authMsg.textContent=text;
+  authMsg.className='auth-msg'+(error?' error':'');
+}
+
+function showConfig(){
+  authMode='config';
+  authTitle.textContent='Conectar Panel';
+  authSubtitle.textContent='Introduce la Publishable Key de Supabase. La URL de tu proyecto ya está configurada.';
+  configFields.style.display='block';
+  loginFields.style.display='none';
+  authPrimary.textContent='Conectar';
+  authSecondary.style.display='none';
+  showMsg('');
+}
+
+function showLogin(){
+  authMode='login';
+  authTitle.textContent='Iniciar sesión';
+  authSubtitle.textContent='Usa la misma cuenta en tu PC y celular para compartir las actividades.';
+  configFields.style.display='none';
+  loginFields.style.display='block';
+  authPrimary.textContent='Iniciar sesión';
+  authSecondary.style.display='inline-block';
+  authSecondary.textContent='Crear cuenta';
+  showMsg('');
+}
+
+async function connectSupabase(){
+  const url=cfgUrl.value.trim().replace(/\/+$/,'');
+  const key=cfgKey.value.trim();
+  if(!url || !key){ showMsg('Introduce la Project URL y la Publishable Key.',true); return; }
+  try{
+    supabaseClient = window.supabase.createClient(url,key,{
+      auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+    });
+    localStorage.setItem(STORAGE_KEY_SUPABASE_URL,url);
+    localStorage.setItem(STORAGE_KEY_SUPABASE_KEY,key);
+    showLogin();
+    showMsg('Conexión lista.');
+  }catch(err){
+    showMsg('No se pudo conectar: '+(err.message||err),true);
+  }
+}
+
+async function signIn(){
+  const email=authEmail.value.trim();
+  const password=authPassword.value;
+  if(!email || !password){ showMsg('Completa correo y contraseña.',true); return; }
+  showMsg('Iniciando sesión...');
+  const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+  if(error){ showMsg(error.message,true); return; }
+  await onSignedIn(data.user);
+}
+
+async function signUp(){
+  const email=authEmail.value.trim();
+  const password=authPassword.value;
+  if(!email || !password){ showMsg('Completa correo y contraseña.',true); return; }
+  if(password.length<6){ showMsg('La contraseña debe tener al menos 6 caracteres.',true); return; }
+  showMsg('Creando cuenta...');
+  const {data,error}=await supabaseClient.auth.signUp({email,password});
+  if(error){ showMsg(error.message,true); return; }
+  if(data.session){
+    await onSignedIn(data.user);
+  }else{
+    showMsg('Cuenta creada. Revisa tu correo si Supabase solicita confirmación y luego inicia sesión.');
+  }
+}
+
+function subscribeRealtime(){
+  if(realtimeChannel) supabaseClient.removeChannel(realtimeChannel);
+  realtimeChannel = supabaseClient.channel('activities-sync-'+currentUser.id)
+    .on('postgres_changes',
+      {event:'*',schema:'public',table:'activities',filter:'user_id=eq.'+currentUser.id},
+      payload=>{
+        const row=payload.new || payload.old;
+        if(!row || row.user_id!==currentUser.id) return;
+        if(payload.eventType==='INSERT'){
+          if(!activities.some(a=>a.id===row.id)) activities.push(normalizeRow(row));
+        }else if(payload.eventType==='UPDATE'){
+          const a=normalizeRow(row);
+          const idx=activities.findIndex(x=>x.id===a.id);
+          if(idx>=0) activities[idx]=a; else activities.push(a);
+        }else if(payload.eventType==='DELETE'){
+          activities=activities.filter(a=>a.id!==row.id);
+        }
+        saveLocalBackup();
+        render();
+        setSyncStatus('☁ Sincronizado');
+      })
+    .subscribe(status=>{
+      if(status==='SUBSCRIBED') setSyncStatus('☁ Tiempo real activo');
+    });
+}
+
+async function onSignedIn(user){
+  currentUser=user;
+  userEmail.textContent=user.email || 'Cuenta';
+  userBar.style.display='flex';
+  authOverlay.style.display='none';
+  setSyncStatus('☁ Cargando...');
+  try{
+    const localBeforeSync=loadLocalActivities();
+    await loadRemoteActivities();
+    subscribeRealtime();
+    const local=localBeforeSync;
+    if(local.length && activities.length===0){
+      setSyncStatus('☁ Hay actividades locales: pulsa "Importar local" para copiarlas', true);
+    }
+    setSyncStatus('☁ Sincronizado');
+  }catch(err){
+    console.error(err);
+    setSyncStatus('⚠ Error de conexión',false);
+    alert('No se pudieron cargar las actividades de Supabase: '+(err.message||err));
+  }
+}
+
+async function importLocalActivities(){
+  const local=loadLocalActivities();
+  if(!local.length || !currentUser) return;
+  btnImportLocal.disabled=true;
+  let ok=0;
+  for(const a of local){
+    try{ await upsertRemote(a); ok++; }catch(e){ console.error(e); }
+  }
+  await loadRemoteActivities();
+  importBox.style.display='none';
+  setSyncStatus('☁ Importadas '+ok+' actividades');
+}
+
+btnImportLocal.addEventListener('click', importLocalActivities);
+btnImportTop.addEventListener('click', importLocalActivities);
+
+authPrimary.addEventListener('click', async ()=>{
+  if(authMode==='config') await connectSupabase();
+  else await signIn();
+});
+authSecondary.addEventListener('click', async ()=>{
+  if(authMode==='login') await signUp();
+});
+btnLogout.addEventListener('click', async ()=>{
+  if(realtimeChannel) await supabaseClient.removeChannel(realtimeChannel);
+  await supabaseClient.auth.signOut();
+  currentUser=null;
+  userBar.style.display='none';
+  authOverlay.style.display='flex';
+  showLogin();
+  setSyncStatus('☁ Sin sesión',false);
+});
+
+async function initSupabaseApp(){
+  await initLocalUI();
+  const savedUrl=localStorage.getItem(STORAGE_KEY_SUPABASE_URL);
+  const savedKey=localStorage.getItem(STORAGE_KEY_SUPABASE_KEY);
+  if(savedUrl && savedKey){
+    cfgUrl.value=savedUrl; cfgKey.value=savedKey;
+    try{
+      supabaseClient=window.supabase.createClient(savedUrl,savedKey,{
+        auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+      });
+      showLogin();
+      const {data}=await supabaseClient.auth.getSession();
+      if(data.session) await onSignedIn(data.session.user);
+      else { authOverlay.style.display='flex'; setSyncStatus('☁ Inicia sesión',false); }
+    }catch(err){
+      console.error(err); showConfig();
+    }
+  }else{
+    showConfig();
+    authOverlay.style.display='flex';
+    setSyncStatus('☁ Configuración pendiente',false);
+  }
+
+  if(supabaseClient){
+    supabaseClient.auth.onAuthStateChange(async (event,session)=>{
+      if(event==='SIGNED_IN' && session && (!currentUser || currentUser.id!==session.user.id)){
+        await onSignedIn(session.user);
+      }
+    });
+  }
+}
+
+initSupabaseApp();
+</script>
+</body>
+</html>
