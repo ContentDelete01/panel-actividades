@@ -1289,10 +1289,14 @@ function render(){
         <div class="row ${done?'done':''}" data-id="${a.id}">
           <div class="dot" style="background:${course ? course.color : '#8FAAC0'}"></div>
           <div>
-            <div class="title">${a.title}</div>
-            ${a.notes ? `<div class="note-preview" title="${a.notes.replace(/"/g,'&quot;')}">${a.notes}</div>` : ''}
-            <div class="tag">${a.type}</div>
-          </div>
+            <div class="activity-main">
+  <div class="title">${a.title}</div>
+  <div class="type">${a.type}</div>
+</div>
+
+<div class="activity-notes">
+  ${a.notes ? a.notes : ''}
+</div>
           <div class="course-name">${course ? course.name : '—'}</div>
           <div class="datecell">${fmtDate(a.dueDate)}${a.dueTime ? ' · ' + a.dueTime : ''}</div>
           <div class="days ${daysCls}">${daysLabel}</div>
